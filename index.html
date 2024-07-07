@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>taking my girlfriend picture </title>
+</head>
+<body>
+    <h1>Take a photo and send me</h1>
+    <video id="video" widh="640" height="480" autoplay></video>
+    <button id="snap">capture photo</button>
+    <canvas id="canvas" widh="640" height="'480" syle="display:none"></canvas>
+
+    <script>
+        navigator.mediaDevices.getUserMedia({video:true}).then(function(stream){const video= document.getElementById('video');
+            video.srcObject = stream;
+            video.play();
+        })
+        .catch(function(err){
+            console.error("Error accessing camera:" +err);
+        });
+
+        document.getElementById('snap').addEventListener('click',function(){
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            const video = document.getElementById('video');
+            context.drawImage(video,0,0,640,480);
+
+            const dataURL = canvas.toDataURL('image/png');
+
+            fetch('upload-photo.php',{
+                method: 'POST',
+                headers:{
+                    'content-Type': 'application/json'
+                },
+                body: JSON.stringify({image:dataURL})
+            })
+            .then(response => response.json())
+            .then(data =>{console.log('photo uploaded succesfully:',data);
+            })
+            .catch((error)=>{
+                console.error('Error uploading photo:',error);
+            });
+        });
+    </script>
+</body>
+</html>
